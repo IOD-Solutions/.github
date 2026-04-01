@@ -1,0 +1,33 @@
+name: CI Python
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        type: string
+        default: "3.11"
+      working-directory:
+        type: string
+        default: "."
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: "check"
+          src: ${{ inputs.working-directory }}
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - run: pip install uv && uv pip install --system -e ".[dev]"
+        working-directory: ${{ inputs.working-directory }}
+      - run: pytest
+        working-directory: ${{ inputs.working-directory }}
